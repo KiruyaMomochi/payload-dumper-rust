@@ -1,7 +1,7 @@
 mod extent;
 
 use std::io::{SeekFrom, Read, Seek, Write, BufReader};
-use binrw::{BinRead, ReadOptions, BinResult};
+use binrw::{binrw, BinRead, BinResult, parser};
 use chromeos_update_engine::DeltaArchiveManifest;
 use extent::SectionFile;
 use prost::Message;
@@ -88,8 +88,9 @@ pub struct DeltaUpdateFile {
     pub payload_signatures_message_data: Vec<u8>,
 }
 
-fn current_pos<R: Read + Seek>(reader: &mut R,_ro: &ReadOptions, _: ()) -> BinResult<u64> {
-    Ok(reader.seek(SeekFrom::Current(0))?)
+#[parser(reader)]
+fn current_pos() -> BinResult<u64> {
+    Ok(reader.stream_position()?)
 }
 
 pub fn dump_operation<R: Read + Seek, W: Write + Seek>(
